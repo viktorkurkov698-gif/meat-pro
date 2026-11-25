@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#8b1e24">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>МясоТехнолог PRO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{display:flex;min-height:100vh;background:#f3f4f6;color:#111827;overflow-x:hidden}
+.mob-bar{display:none;position:fixed;top:0;left:0;right:0;height:54px;background:#8b1e24;color:#fff;z-index:100;align-items:center;justify-content:space-between;padding:0 14px;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.mob-bar button{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:6px}
+.mob-title{font-weight:bold;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:75%}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150}
+.overlay.show{display:block}
+.sidebar{width:265px;background:#1f2937;color:#fff;flex-shrink:0;overflow-y:auto;transition:transform 0.25s ease}
+.brand{padding:16px;background:#8b1e24;font-weight:bold;font-size:17px}
+.nav-t{padding:12px 15px 4px;font-size:11px;color:#9ca3af;text-transform:uppercase}
+.nav-b{display:block;width:100%;text-align:left;background:none;border:none;color:#fff;padding:12px 15px;font-size:14px;cursor:pointer;border-left:4px solid transparent}
+.nav-b:hover,.nav-b.active{background:#374151;border-left-color:#8b1e24;font-weight:bold}
+.main{flex:1;padding:18px;max-width:1320px;width:100%}
+.page{display:none}.page.active{display:block}
+.card{background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:14px;margin-bottom:14px;page-break-inside:avoid}
+h2{font-size:15px;color:#8b1e24;margin-bottom:10px;border-bottom:1px solid #e5e7eb;padding-bottom:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+label{display:block;font-size:12px;font-weight:bold;color:#4b5563;margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #9ca3af;border-radius:6px;font-size:15px;background:#fff}
+.btn{padding:10px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px;color:#fff;background:#8b1e24;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px}
+.btn-g{background:#059669}.btn-s{background:#4b5563}.btn-b{background:#2563eb}.btn-r{background:#dc2626;padding:6px 10px;min-height:36px}
+.tbl-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;margin-top:6px;min-width:620px}
+th,td{border-bottom:1px solid #e5e7eb;padding:8px 6px;text-align:left;font-size:13px}
+th{background:#f9fafb}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px}
+.stat{background:#fff;border:1px solid #f87171;padding:10px;border-radius:8px}
+.stat span{font-size:12px;color:#4b5563}
+.stat b{display:block;font-size:16px;color:#8b1e24;margin-top:3px}
+.step{border:1px solid #d1d5db;padding:12px;border-radius:8px;margin-bottom:10px;background:#f9fafb;page-break-inside:avoid}
+.step img{max-width:100%;max-height:220px;margin-top:8px;border-radius:6px;display:block}
+@media (max-width:820px){
+ .mob-bar{display:flex}
+ .sidebar{position:fixed;top:0;left:0;bottom:0;z-index:200;transform:translateX(-100%)}
+ .sidebar.open{transform:translateX(0)}
+ .main{padding:66px 10px 80px 10px}
+ .stats{grid-template-columns:repeat(2,1fr)}
+ .stats .stat:last-child{grid-column:span 2}
+}
+@media print{
+ .sidebar,.mob-bar,.overlay,.no-print{display:none!important}
+ body{background:#fff}
+ .main{padding:0;max-width:100%}
+ .card{border:1px solid #bbb;box-shadow:none}
+ input,textarea{border:none;padding:2px 0;font-weight:bold}
+}
+</style>
+</head>
+<body>
+<datalist id="dl-m"></datalist><datalist id="dl-i"></datalist><datalist id="dl-c"></datalist><datalist id="dl-g"></datalist>
+
+<div class="mob-bar no-print">
+ <button type="button" onclick="toggleMenu()">☰</button>
+ <div class="mob-title" id="mob-header-title">МясоТехнолог PRO</div>
+ <button type="button" onclick="saveRec()" title="Сохранить">💾</button>
+</div>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="sidebar" id="sidebar">
+ <div class="brand">🥩 МясоТехнолог PRO</div>
+ <div class="nav-t">Колбасы и ветчины</div>
+ <button type="button" class="nav-b active" onclick="openCat('boiled',this)">🌭 Вареные колбасы</button>
+ <button type="button" class="nav-b" onclick="openCat('boiled_smoked',this)">🔥 Варено-копчёные</button>
+ <button type="button" class="nav-b" onclick="openCat('semi_smoked',this)">🥓 Полукопчёные</button>
+ <button type="button" class="nav-b" onclick="openCat('raw_smoked',this)">🍖 Сырокопчёные</button>
+ <button type="button" class="nav-b" onclick="openCat('dry_cured',this)">🥩 Сыровяленые</button>
+ <button type="button" class="nav-b" onclick="openCat('hams',this)">🍖 Ветчины реструктур.</button>
+ <button type="button" class="nav-b" onclick="openCat('liver_blood',this)">🩸 Ливерные и кровяные</button>
+ <div class="nav-t">Деликатесы, снеки, консервы</div>
+ <button type="button" class="nav-b" onclick="openCat('delicacies',this)">🍗 Цельномышечные</button>
+ <button type="button" class="nav-b" onclick="openCat('baked',this)">🥘 Запечённые (рулеты/хлеб)</button>
+ <button type="button" class="nav-b" onclick="openCat('snacks',this)">🥨 Сыровяленые снеки</button>
+ <button type="button" class="nav-b" onclick="openCat('pates',this)">🥫 Паштеты</button>
+ <button type="button" class="nav-b" onclick="openCat('canned',this)">🥫 Мясные консервы</button>
+ <button type="button" class="nav-b" onclick="openCat('semi_finished',this)">🍢 Рубленые п/ф (купаты)</button>
+ <button type="button" class="nav-b" onclick="openCat('brines_only',this)">🧪 Рассолы для инъектир.</button>
+ <div class="nav-t">База и справочники</div>
+ <button type="button" class="nav-b" onclick="showTab('t-db',this)">📂 Сохранённые рецепты</button>
+ <button type="button" class="nav-b" onclick="showTab('t-dir',this)">📚 Справочники</button>
+</div>
+
+<div class="main">
+ <div id="t-calc" class="page active">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+   <h1 id="p-title" style="font-size:19px">Вареные колбасы</h1>
+   <div class="no-print" style="display:flex;gap:6px;flex-wrap:wrap;width:100%">
+    <button type="button" class="btn btn-g" style="flex:1" onclick="saveRec()">💾 Сохранить</button>
+    <button type="button" class="btn btn-b" style="flex:1" onclick="exportPDF()">📄 В PDF</button>
+    <button type="button" class="btn btn-s" style="flex:1" onclick="exportSingleCurrent()">📤 Файл</button>
+   </div>
+  </div>
+
+  <div class="stats">
+   <div class="stat"><span>Основное сырьё</span><b id="o-meat">0.00 кг</b></div>
+   <div class="stat"><span>Рассол / Смеси</span><b id="o-add">0.00 кг</b></div>
+   <div class="stat"><span>Выход готовой прод.</span><b id="o-fin">0.00 кг (100%)</b></div>
+   <div class="stat"><span>Затраты на партию</span><b id="o-cost">0.00 ₽</b></div>
+   <div class="stat"><span>Себестоимость 1 кг</span><b id="o-kg">0.00 ₽/кг</b></div>
+  </div>
+
+  <div class="card">
+   <h2>1. Общие параметры и потери</h2>
+   <div class="grid">
+    <div><label>Название изделия</label><input type="text" id="i-name" placeholder="Например: Докторская"></div>
+    <div><label>Закладка сырья / базы (кг)</label><input type="number" inputmode="decimal" id="i-batch" value="100" step="0.1" oninput="calc()"></div>
+    <div><label>Технологические потери (%)</label><input type="number" inputmode="decimal" id="i-loss" value="7" step="0.5" oninput="calc()"></div>
+    <div><label>ГОСТ / ТУ / Примечание</label><input type="text" id="i-gost" placeholder="ГОСТ / ТУ"></div>
+   </div>
+  </div>
+
+  <div class="card" id="meat-card">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <h2 style="border:none;margin:0" id="meat-card-title">2. Основное сырьё</h2>
+    <button type="button" class="btn no-print" onclick="addMeat()">+ Сырьё</button>
+   </div>
+   <div class="tbl-wrap">
+    <table>
+     <thead><tr><th>Наименование</th><th style="width:85px">Доля %</th><th style="width:90px">Масса кг</th><th style="width:155px">Решётка</th><th style="width:95px">Цена ₽</th><th style="width:95px">Сумма ₽</th><th class="no-print" style="width:40px"></th></tr></thead>
+     <tbody id="tb-m"></tbody>
+    </table>
+   </div>
+  </div>
+  <div class="card">
+   <div style="display:flex;justify-content:space-between;align-items:center">
+    <h2 style="border:none;margin:0">3. Рассол (инъектир.)</h2>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px"><input type="checkbox" id="u-brine" onchange="togBrine()" style="width:20px;height:20px"> Включить</label>
+   </div>
+   <div id="b-box" style="display:none;margin-top:10px">
+    <div class="grid" style="margin-bottom:8px">
+     <div><label>Инъектирование (%)</label><input type="number" inputmode="decimal" id="b-pct" value="30" oninput="calc()"></div>
+     <div><label>Потери массир. (%)</label><input type="number" inputmode="decimal" id="b-loss" value="3" oninput="calc()"></div>
+     <div><label>Масса рассола (кг)</label><input type="text" id="b-kg" readonly style="background:#f3f4f6;font-weight:bold"></div>
+    </div>
+    <button type="button" class="btn btn-s no-print" onclick="addBrine()">+ Компонент рассола</button>
+    <div class="tbl-wrap">
+     <table>
+      <thead><tr><th>Компонент</th><th style="width:95px">Доля %</th><th style="width:95px">Масса кг</th><th style="width:95px">Цена ₽</th><th style="width:95px">Сумма ₽</th><th class="no-print" style="width:40px"></th></tr></thead>
+      <tbody id="tb-b"></tbody>
+     </table>
+    </div>
+   </div>
+  </div>
+
+  <div class="card">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <h2 style="border:none;margin:0">4. Смеси, специи, влага</h2>
+    <button type="button" class="btn no-print" onclick="addIng()">+ Смесь</button>
+   </div>
+   <div class="tbl-wrap">
+    <table>
+     <thead><tr><th>Наименование</th><th style="width:105px">На 100 кг</th><th style="width:95px">Партия кг</th><th style="width:95px">Цена ₽</th><th style="width:95px">Сумма ₽</th><th class="no-print" style="width:40px"></th></tr></thead>
+     <tbody id="tb-i"></tbody>
+    </table>
+   </div>
+  </div>
+
+  <div class="card">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <h2 style="border:none;margin:0">5. Оболочки и тара</h2>
+    <button type="button" class="btn no-print" onclick="addCas()">+ Оболочка</button>
+   </div>
+   <div class="tbl-wrap">
+    <table>
+     <thead><tr><th>Оболочка / тара</th><th style="width:105px">На 100 кг</th><th style="width:95px">Партия</th><th style="width:95px">Цена ₽</th><th style="width:95px">Сумма ₽</th><th class="no-print" style="width:40px"></th></tr></thead>
+     <tbody id="tb-c"></tbody>
+    </table>
+   </div>
+  </div>
+
+  <div class="card">
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <h2 style="border:none;margin:0">6. Тепловые режимы и фото</h2>
+    <button type="button" class="btn no-print" onclick="addStep()">+ Этап</button>
+   </div>
+   <div id="s-box"></div>
+  </div>
+ </div>
+
+ <div id="t-db" class="page">
+  <div class="card">
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <h2 style="border:none;margin:0">📂 Сохранённые рецептуры</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;width:100%">
+     <button type="button" class="btn btn-b" style="flex:1" onclick="exportBackup()">⬇️ Экспорт базы</button>
+     <label class="btn btn-s" style="margin:0;cursor:pointer;flex:1">⬆️ Импорт (.json)<input type="file" accept=".json" onchange="importBackup(event)" style="display:none"></label>
+    </div>
+   </div>
+   <div class="grid" style="margin-bottom:12px;background:#f9fafb;padding:10px;border-radius:6px;border:1px solid #e5e7eb">
+    <div><label>Поиск рецепта</label><input type="text" id="db-search" placeholder="Название или ГОСТ..." oninput="renderDb()"></div>
+    <div><label>Категория</label><select id="db-cat-filter" onchange="renderDb()"></select></div>
+   </div>
+   <div class="tbl-wrap">
+    <table>
+     <thead><tr><th>Название</th><th>Категория</th><th>Выход</th><th>Себест.</th><th style="width:190px">Действия</th></tr></thead>
+     <tbody id="tb-db"></tbody>
+    </table>
+   </div>
+  </div>
+ </div>
+
+ <div id="t-dir" class="page">
+  <div class="grid">
+   <div class="card"><h2>Сырьё (₽/кг)</h2><div style="display:flex;gap:6px;margin-bottom:8px"><input type="text" id="dm-n" placeholder="Название"><input type="number" inputmode="decimal" id="dm-p" placeholder="Цена" style="width:90px"><button type="button" class="btn" onclick="addDir('meats','dm-n','dm-p')">+</button></div><table><tbody id="dir-meats"></tbody></table></div>
+   <div class="card"><h2>Смеси и специи (₽/кг)</h2><div style="display:flex;gap:6px;margin-bottom:8px"><input type="text" id="di-n" placeholder="Название"><input type="number" inputmode="decimal" id="di-p" placeholder="Цена" style="width:90px"><button type="button" class="btn" onclick="addDir('ings','di-n','di-p')">+</button></div><table><tbody id="dir-ings"></tbody></table></div>
+   <div class="card"><h2>Оболочки и тара (₽)</h2><div style="display:flex;gap:6px;margin-bottom:8px"><input type="text" id="dc-n" placeholder="Название"><input type="number" inputmode="decimal" id="dc-p" placeholder="Цена" style="width:90px"><button type="button" class="btn" onclick="addDir('casings','dc-n','dc-p')">+</button></div><table><tbody id="dir-casings"></tbody></table></div>
+   <div class="card"><h2>Решётки и обработка</h2><div style="display:flex;gap:6px;margin-bottom:8px"><input type="text" id="dg-n" placeholder="Например: 3 мм"><button type="button" class="btn" onclick="addDir('grids','dg-n',null)">+</button></div><table><tbody id="dir-grids"></tbody></table></div>
+  </div>
+ </div>
+</div>
+<script>
+var CATS={
+ boiled:{name:'Вареные колбасы',loss:7,brine:false},
+ boiled_smoked:{name:'Варено-копчёные колбасы',loss:20,brine:false},
+ semi_smoked:{name:'Полукопчёные колбасы',loss:14,brine:false},
+ raw_smoked:{name:'Сырокопчёные колбасы',loss:32,brine:false},
+ dry_cured:{name:'Сыровяленые колбасы',loss:38,brine:false},
+ hams:{name:'Ветчины реструктурированные',loss:6,brine:true},
+ liver_blood:{name:'Ливерные и кровяные колбасы',loss:8,brine:false},
+ delicacies:{name:'Цельномышечные деликатесы',loss:12,brine:true},
+ baked:{name:'Запечённые (рулеты, мясной хлеб)',loss:18,brine:true},
+ snacks:{name:'Сыровяленые снеки (чипсы, джерки)',loss:48,brine:false},
+ pates:{name:'Паштеты',loss:5,brine:false},
+ canned:{name:'Мясные консервы',loss:2,brine:false},
+ semi_finished:{name:'Рубленые полуфабрикаты (купаты)',loss:2,brine:false},
+ brines_only:{name:'Рассолы для инъектирования',loss:0,brine:false}
+};
+
+var dir={
+ meats:[
+  {name:'Говядина в/с',price:620},{name:'Свинина нежирная',price:410},{name:'Свинина полужирная',price:370},
+  {name:'Шпик хребтовой',price:290},{name:'Карбонад свиной',price:450},{name:'Печень говяжья бланш.',price:220},
+  {name:'Кровь пищевая стабилиз.',price:90},{name:'Филе куриной грудки',price:340},{name:'Вода ледяная (база рассола)',price:2}
+ ],
+ ings:[
+  {name:'Соль нитритная 0,6%',price:65},{name:'Соль поваренная',price:25},{name:'Смесь специй Докторская',price:850},
+  {name:'Фосфат пищевой (рассольный)',price:480},{name:'Каррагинан / Камедь',price:920},{name:'ГДЛ / Стартовые культуры',price:1800},
+  {name:'Лист лавровый / Перец горошек',price:550},{name:'Вода / Лёд',price:2}
+ ],
+ casings:[
+  {name:'Полиамид ф65 (м)',price:18},{name:'Фиброуз ф55 (м)',price:26},{name:'Черева свиная 38/40 (м)',price:22},
+  {name:'Банка жестяная №9 с крышкой (шт)',price:28},{name:'Пакет вакуумный для снеков (шт)',price:9},{name:'Форма / Пакет для запекания (шт)',price:15}
+ ],
+ grids:['Решётка 2 мм','Решётка 3 мм','Решётка 5 мм','Решётка 8 мм','Решётка 16-20 мм (шрот)','Куттер','Слайсер (пласты 3-4 мм)','Кусок 30-50 г (консервы)','Цельный кусок','Растворение в рассоле']
+};
+
+try{var sd=JSON.parse(localStorage.getItem('mt_dir'));if(sd&&sd.meats)dir=sd;}catch(e){}
+var recipes=[];
+try{var sr=JSON.parse(localStorage.getItem('mt_rec'));if(Array.isArray(sr))recipes=sr;}catch(e){}
+var curCat='boiled',st={meats:[],brine:[],ings:[],cas:[],steps:[]};
+
+function toggleMenu(){
+ document.getElementById('sidebar').classList.toggle('open');
+ document.getElementById('overlay').classList.toggle('show');
+}
+function closeMenu(){
+ document.getElementById('sidebar').classList.remove('open');
+ document.getElementById('overlay').classList.remove('show');
+}
+
+function fillLists(){
+ document.getElementById('dl-m').innerHTML=dir.meats.map(function(x){return'<option value="'+x.name+'">'}).join('');
+ document.getElementById('dl-i').innerHTML=dir.ings.map(function(x){return'<option value="'+x.name+'">'}).join('');
+ document.getElementById('dl-c').innerHTML=dir.casings.map(function(x){return'<option value="'+x.name+'">'}).join('');
+ document.getElementById('dl-g').innerHTML=dir.grids.map(function(x){return'<option value="'+x+'">'}).join('');
+ var fOpts='<option value="all">Все категории ('+recipes.length+')</option>';
+ for(var k in CATS){fOpts+='<option value="'+k+'">'+CATS[k].name+'</option>';}
+ var sel=document.getElementById('db-cat-filter');var prevVal=sel.value||'all';sel.innerHTML=fOpts;sel.value=prevVal;
+}
+
+function showTab(id,btn){
+ closeMenu();
+ var bs=document.querySelectorAll('.nav-b');for(var i=0;i<bs.length;i++)bs.item(i).classList.remove('active');
+ if(btn)btn.classList.add('active');
+ var ps=document.querySelectorAll('.page');for(var j=0;j<ps.length;j++)ps.item(j).classList.remove('active');
+ document.getElementById(id).classList.add('active');
+ if(id==='t-db'){document.getElementById('mob-header-title').innerText='Сохранённые рецепты';fillLists();renderDb();}
+ if(id==='t-dir'){document.getElementById('mob-header-title').innerText='Справочники';renderDir();}
+}
+function openCat(c,btn){
+ curCat=c;showTab('t-calc',btn);var info=CATS[c];
+ document.getElementById('p-title').innerText=info.name;
+ document.getElementById('mob-header-title').innerText=info.name;
+ document.getElementById('i-loss').value=info.loss;
+ document.getElementById('u-brine').checked=info.brine;
+ if(c==='brines_only'){
+  document.getElementById('meat-card-title').innerText='2. Компоненты рассола (100%)';
+  st={meats:[{name:'Вода ледяная (база рассола)',pct:84,grid:'Растворение в рассоле',price:2},{name:'Соль нитритная 0,6%',pct:7.5,grid:'Растворение в рассоле',price:65},{name:'Фосфат пищевой (рассольный)',pct:2.5,grid:'Растворение в рассоле',price:480},{name:'Каррагинан / Камедь',pct:2.0,grid:'Растворение в рассоле',price:920},{name:'Соевый / животный белок',pct:4.0,grid:'Растворение в рассоле',price:410}],brine:[],ings:[],cas:[],steps:[{title:'Приготовление рассола',temp:'0...+2 °C',time:'20 мин',desc:'Растворить фосфат в ледяной воде, внести соль, белок, каррагинан и специи.',photo:''}]};
+ } else if(c==='canned'){
+  document.getElementById('meat-card-title').innerText='2. Основное сырьё';
+  st={meats:[{name:'Свинина полужирная',pct:85,grid:'Кусок 30-50 г (консервы)',price:370},{name:'Шпик хребтовой',pct:15,grid:'Кусок 30-50 г (консервы)',price:290}],brine:[],ings:[{name:'Соль поваренная',norm:1.15,price:25},{name:'Лист лавровый / Перец горошек',norm:0.15,price:550}],cas:[{name:'Банка жестяная №9 с крышкой (шт)',norm:295,price:28}],steps:[{title:'Закладка и закатка',temp:'+4...+8 °C',time:'30 мин',desc:'Уложить специи на дно банки, заполнить мясом, закатать.',photo:''},{title:'Стерилизация в автоклаве',temp:'115...120 °C (2.2 атм)',time:'75 мин',desc:'Прогрев, стерилизация и охлаждение.',photo:''}]};
+ } else {
+  document.getElementById('meat-card-title').innerText='2. Основное сырьё';
+  st={meats:[{name:'Говядина в/с',pct:60,grid:c==='hams'?'Решётка 16-20 мм (шрот)':(c==='snacks'?'Слайсер (пласты 3-4 мм)':'Решётка 3 мм'),price:620},{name:'Свинина полужирная',pct:40,grid:'Решётка 5 мм',price:370}],brine:[{name:'Вода / Лёд',pct:85,price:2},{name:'Соль нитритная 0,6%',pct:7,price:65},{name:'Фосфат пищевой (рассольный)',pct:8,price:480}],ings:[{name:'Соль нитритная 0,6%',norm:2.0,price:65},{name:'Смесь специй Докторская',norm:0.6,price:850},{name:'Вода / Лёд',norm:c==='snacks'||c==='raw_smoked'?0:20.0,price:2}],cas:[{name:c==='snacks'?'Пакет вакуумный для снеков (шт)':'Полиамид ф65 (м)',norm:45,price:18}],steps:[{title:'Подготовка и посол',temp:'0...+4 °C',time:'20 мин',desc:'Измельчение сырья, внесение специй и добавок.',photo:''},{title:'Термообработка / Сушка',temp:'78...80 °C',time:'90 мин',desc:'Согласно технологической инструкции.',photo:''}]};
+ }
+ togBrine();renderAll();
+}
+
+function togBrine(){document.getElementById('b-box').style.display=document.getElementById('u-brine').checked?'block':'none';calc();}
+function renderAll(){renderM();renderB();renderI();renderC();renderS();calc();}
+
+function renderM(){var h='';for(var i=0;i<st.meats.length;i++){var m=st.meats.at(i);h+='<tr><td><input type="text" list="dl-m" value="'+m.name+'" oninput="onMN('+i+',this.value)"></td><td><input type="number" inputmode="decimal" step="0.1" value="'+m.pct+'" oninput="st.meats.at('+i+').pct=+this.value;calc()"></td><td class="mw">0</td><td><input type="text" list="dl-g" value="'+m.grid+'" oninput="st.meats.at('+i+').grid=this.value"></td><td><input type="number" inputmode="decimal" step="0.1" id="mp'+i+'" value="'+m.price+'" oninput="st.meats.at('+i+').price=+this.value;calc()"></td><td class="mc">0</td><td class="no-print"><button type="button" class="btn btn-r" onclick="st.meats.splice('+i+',1);renderM();calc()">✕</button></td></tr>';}document.getElementById('tb-m').innerHTML=h;}
+function onMN(i,v){st.meats.at(i).name=v;var f=dir.meats.find(function(x){return x.name.toLowerCase()===v.trim().toLowerCase()});if(f){st.meats.at(i).price=f.price;document.getElementById('mp'+i).value=f.price;}calc();}
+function addMeat(){st.meats.push({name:'',pct:0,grid:'Решётка 3 мм',price:0});renderM();calc();}
+
+function renderB(){var h='';for(var i=0;i<st.brine.length;i++){var b=st.brine.at(i);h+='<tr><td><input type="text" list="dl-i" value="'+b.name+'" oninput="st.brine.at('+i+').name=this.value"></td><td><input type="number" inputmode="decimal" step="0.1" value="'+b.pct+'" oninput="st.brine.at('+i+').pct=+this.value;calc()"></td><td class="bw">0</td><td><input type="number" inputmode="decimal" step="0.1" value="'+b.price+'" oninput="st.brine.at('+i+').price=+this.value;calc()"></td><td class="bc">0</td><td class="no-print"><button type="button" class="btn btn-r" onclick="st.brine.splice('+i+',1);renderB();calc()">✕</button></td></tr>';}document.getElementById('tb-b').innerHTML=h;}
+function addBrine(){st.brine.push({name:'',pct:0,price:0});renderB();calc();}
+
+function renderI(){var h='';for(var i=0;i<st.ings.length;i++){var x=st.ings.at(i);h+='<tr><td><input type="text" list="dl-i" value="'+x.name+'" oninput="onIN('+i+',this.value)"></td><td><input type="number" inputmode="decimal" step="0.01" value="'+x.norm+'" oninput="st.ings.at('+i+').norm=+this.value;calc()"></td><td class="iw">0</td><td><input type="number" inputmode="decimal" step="0.1" id="ip'+i+'" value="'+x.price+'" oninput="st.ings.at('+i+').price=+this.value;calc()"></td><td class="ic">0</td><td class="no-print"><button type="button" class="btn btn-r" onclick="st.ings.splice('+i+',1);renderI();calc()">✕</button></td></tr>';}document.getElementById('tb-i').innerHTML=h;}
+function onIN(i,v){st.ings.at(i).name=v;var f=dir.ings.find(function(x){return x.name.toLowerCase()===v.trim().toLowerCase()});if(f){st.ings.at(i).price=f.price;document.getElementById('ip'+i).value=f.price;}calc();}
+function addIng(){st.ings.push({name:'',norm:0,price:0});renderI();calc();}
+
+function renderC(){var h='';for(var i=0;i<st.cas.length;i++){var c=st.cas.at(i);h+='<tr><td><input type="text" list="dl-c" value="'+c.name+'" oninput="onCN('+i+',this.value)"></td><td><input type="number" inputmode="decimal" step="0.1" value="'+c.norm+'" oninput="st.cas.at('+i+').norm=+this.value;calc()"></td><td class="cw">0</td><td><input type="number" inputmode="decimal" step="0.1" id="cp'+i+'" value="'+c.price+'" oninput="st.cas.at('+i+').price=+this.value;calc()"></td><td class="cc">0</td><td class="no-print"><button type="button" class="btn btn-r" onclick="st.cas.splice('+i+',1);renderC();calc()">✕</button></td></tr>';}document.getElementById('tb-c').innerHTML=h;}
+function onCN(i,v){st.cas.at(i).name=v;var f=dir.casings.find(function(x){return x.name.toLowerCase()===v.trim().toLowerCase()});if(f){st.cas.at(i).price=f.price;document.getElementById('cp'+i).value=f.price;}calc();}
+function addCas(){st.cas.push({name:'',norm:0,price:0});renderC();calc();}
+function renderS(){var h='';for(var i=0;i<st.steps.length;i++){var s=st.steps.at(i);h+='<div class="step"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b>Этап '+(i+1)+'</b><button type="button" class="btn btn-r no-print" onclick="st.steps.splice('+i+',1);renderS()">Удалить</button></div><div class="grid"><div><label>Операция</label><input type="text" value="'+s.title+'" oninput="st.steps.at('+i+').title=this.value"></div><div><label>Температура / Влажность</label><input type="text" value="'+s.temp+'" oninput="st.steps.at('+i+').temp=this.value"></div><div><label>Время</label><input type="text" value="'+s.time+'" oninput="st.steps.at('+i+').time=this.value"></div></div><div style="margin-top:6px"><label>Описание</label><textarea rows="2" oninput="st.steps.at('+i+').desc=this.value">'+s.desc+'</textarea></div><div class="no-print" style="margin-top:8px"><label>📷 Фото с камеры или из галереи:</label><input type="file" accept="image/*" onchange="ldPh(event,'+i+')"></div>'+(s.photo?'<img src="'+s.photo+'">':'')+'</div>';}document.getElementById('s-box').innerHTML=h;}
+function addStep(){st.steps.push({title:'Новый этап',temp:'',time:'',desc:'',photo:''});renderS();}
+function ldPh(e,i){var f=e.target.files.item(0);if(!f)return;var r=new FileReader();r.onload=function(ev){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),w=img.width>450?450:img.width;c.width=w;c.height=img.height*(w/img.width);c.getContext('2d').drawImage(img,0,0,c.width,c.height);st.steps.at(i).photo=c.toDataURL('image/jpeg',0.7);renderS();};img.src=ev.target.result;};r.readAsDataURL(f);}
+
+function calc(){
+ var b=+document.getElementById('i-batch').value||0,l=+document.getElementById('i-loss').value||0,ub=document.getElementById('u-brine').checked;
+ var mW=0,mC=0,mw=document.querySelectorAll('.mw'),mc=document.querySelectorAll('.mc');
+ for(var i=0;i<st.meats.length;i++){var m=st.meats.at(i),w=b*m.pct/100,c=w*m.price;mW+=w;mC+=c;if(mw.item(i))mw.item(i).innerText=w.toFixed(2)+' кг';if(mc.item(i))mc.item(i).innerText=c.toFixed(2)+' ₽';}
+ var bp=+document.getElementById('b-pct').value||0,bl=+document.getElementById('b-loss').value||0,tb=b*bp/100;
+ document.getElementById('b-kg').value=tb.toFixed(2)+' кг';
+ var bC=0,bN=0,bw=document.querySelectorAll('.bw'),bc=document.querySelectorAll('.bc');
+ for(var j=0;j<st.brine.length;j++){var x=st.brine.at(j),w2=tb*x.pct/100,c2=w2*x.price;if(ub)bC+=c2;if(bw.item(j))bw.item(j).innerText=w2.toFixed(2)+' кг';if(bc.item(j))bc.item(j).innerText=c2.toFixed(2)+' ₽';}
+ if(ub)bN=tb*(1-bl/100);
+ var iW=0,iC=0,iw=document.querySelectorAll('.iw'),ic=document.querySelectorAll('.ic');
+ for(var k=0;k<st.ings.length;k++){var g=st.ings.at(k),w3=b*g.norm/100,c3=w3*g.price;iW+=w3;iC+=c3;if(iw.item(k))iw.item(k).innerText=w3.toFixed(3)+' кг';if(ic.item(k))ic.item(k).innerText=c3.toFixed(2)+' ₽';}
+ var cC=0,cw=document.querySelectorAll('.cw'),cc=document.querySelectorAll('.cc');
+ for(var q=0;q<st.cas.length;q++){var cs=st.cas.at(q),w4=b*cs.norm/100,c4=w4*cs.price;cC+=c4;if(cw.item(q))cw.item(q).innerText=w4.toFixed(1);if(cc.item(q))cc.item(q).innerText=c4.toFixed(2)+' ₽';}
+ var fW=(mW+bN+iW)*(1-l/100),yP=mW>0?(fW/mW*100):0,tC=mC+bC+iC+cC,kC=fW>0?(tC/fW):0;
+ document.getElementById('o-meat').innerText=mW.toFixed(2)+' кг';
+ document.getElementById('o-add').innerText=(bN+iW).toFixed(2)+' кг';
+ document.getElementById('o-fin').innerText=fW.toFixed(2)+' кг ('+yP.toFixed(1)+'%)';
+ document.getElementById('o-cost').innerText=tC.toFixed(2)+' ₽';
+ document.getElementById('o-kg').innerText=kC.toFixed(2)+' ₽/кг';
+}
+
+function downloadJson(obj,filename){var blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
+function exportPDF(){var o=document.title;var n=document.getElementById('i-name').value.trim()||document.getElementById('p-title').innerText;document.title='Рецептура - '+n;window.print();setTimeout(function(){document.title=o;},1000);}
+function getCurrentRecipeObj(n){return{cat:curCat,name:n,batch:+document.getElementById('i-batch').value,loss:+document.getElementById('i-loss').value,gost:document.getElementById('i-gost').value,ub:document.getElementById('u-brine').checked,bp:+document.getElementById('b-pct').value,bl:+document.getElementById('b-loss').value,of:document.getElementById('o-fin').innerText,ok:document.getElementById('o-kg').innerText,st:JSON.parse(JSON.stringify(st))};}
+function exportSingleCurrent(){var n=document.getElementById('i-name').value.trim()||document.getElementById('p-title').innerText;downloadJson({singleRecipe:getCurrentRecipeObj(n)},'recept_'+n.replace(/[^a-zA-Zа-яА-Я0-9_-]/g,'_')+'.json');}
+function exportSingleSaved(i){var r=recipes.at(i);if(r)downloadJson({singleRecipe:r},'recept_'+r.name.replace(/[^a-zA-Zа-яА-Я0-9_-]/g,'_')+'.json');}
+function exportBackup(){downloadJson({dir:dir,recipes:recipes},'meat_recipes_backup_'+new Date().toISOString().slice(0,10)+'.json');}
+
+function importBackup(e){
+ var f=e.target.files.item(0);if(!f)return;var r=new FileReader();
+ r.onload=function(ev){
+  try{
+   var p=JSON.parse(ev.target.result);
+   if(p.singleRecipe&&p.singleRecipe.name){recipes.push(p.singleRecipe);localStorage.setItem('mt_rec',JSON.stringify(recipes));fillLists();renderDb();alert('Рецепт «'+p.singleRecipe.name+'» добавлен!');return;}
+   if(p.dir&&p.dir.meats){dir=p.dir;localStorage.setItem('mt_dir',JSON.stringify(dir));}
+   if(Array.isArray(p.recipes)){recipes=p.recipes;localStorage.setItem('mt_rec',JSON.stringify(recipes));}
+   fillLists();renderDir();renderDb();alert('База загружена ('+recipes.length+' шт.)!');
+  }catch(err){alert('Ошибка формата файла.');}
+ };
+ r.readAsText(f);e.target.value='';
+}
+
+function saveRec(){var n=document.getElementById('i-name').value.trim();if(!n){alert('Введите название изделия!');return;}recipes.push(getCurrentRecipeObj(n));localStorage.setItem('mt_rec',JSON.stringify(recipes));fillLists();alert('Рецептура «'+n+'» сохранена!');}
+function renderDb(){
+ var q=(document.getElementById('db-search').value||'').trim().toLowerCase(),catF=document.getElementById('db-cat-filter').value||'all',h='';
+ for(var i=0;i<recipes.length;i++){
+  var r=recipes.at(i);if(catF!=='all'&&r.cat!==catF)continue;
+  if(q&&(r.name+' '+(r.gost||'')).toLowerCase().indexOf(q)===-1)continue;
+  h+='<tr><td><b>'+r.name+'</b><br><small style="color:#6b7280">'+(r.gost||'')+'</small></td><td>'+(CATS[r.cat]?CATS[r.cat].name:'')+'</td><td>'+r.of+'</td><td>'+r.ok+'</td><td style="display:flex;gap:4px;flex-wrap:wrap"><button type="button" class="btn" onclick="ldRec('+i+')">Открыть</button> <button type="button" class="btn btn-b" onclick="exportSingleSaved('+i+')">📤 Файл</button> <button type="button" class="btn btn-r" onclick="if(confirm(\'Удалить?\')){recipes.splice('+i+',1);localStorage.setItem(\'mt_rec\',JSON.stringify(recipes));fillLists();renderDb();}">✕</button></td></tr>';
+ }
+ document.getElementById('tb-db').innerHTML=h||'<tr><td colspan="5" style="text-align:center;color:#6b7280">Рецептуры не найдены</td></tr>';
+}
+function ldRec(i){var r=recipes.at(i);curCat=r.cat;showTab('t-calc',document.querySelector('.nav-b'));document.getElementById('p-title').innerText=r.name;document.getElementById('i-name').value=r.name;document.getElementById('i-batch').value=r.batch;document.getElementById('i-loss').value=r.loss;document.getElementById('i-gost').value=r.gost;document.getElementById('u-brine').checked=r.ub;document.getElementById('b-pct').value=r.bp;document.getElementById('b-loss').value=r.bl;st=JSON.parse(JSON.stringify(r.st));togBrine();renderAll();}
+function renderDir(){var f=function(id,arr,obj){var h='';for(var i=0;i<arr.length;i++){var it=arr.at(i);h+='<tr><td>'+(obj?it.name:it)+'</td><td>'+(obj?it.price+' ₽':'')+'</td><td style="width:36px"><button type="button" class="btn btn-r" onclick="dir.'+id+'.splice('+i+',1);localStorage.setItem(\'mt_dir\',JSON.stringify(dir));renderDir();fillLists()">✕</button></td></tr>';}document.getElementById('dir-'+id).innerHTML=h;};f('meats',dir.meats,true);f('ings',dir.ings,true);f('casings',dir.casings,true);f('grids',dir.grids,false);}
+function addDir(k,nid,pid){var n=document.getElementById(nid).value.trim();if(!n)return;if(pid){dir[k].push({name:n,price:+document.getElementById(pid).value||0});document.getElementById(pid).value='';}else{dir[k].push(n);}document.getElementById(nid).value='';localStorage.setItem('mt_dir',JSON.stringify(dir));renderDir();fillLists();}
+fillLists();openCat('boiled',document.querySelector('.nav-b'));
+</script>
+</body>
+</html>
